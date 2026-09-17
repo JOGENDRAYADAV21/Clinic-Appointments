@@ -1,0 +1,21 @@
+{
+  "name": "medislot",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Smart clinic appointment and scheduling system",
+  "workspaces": ["apps/web", "apps/api"],
+  "scripts": {
+    "dev": "concurrently \"npm run dev --workspace apps/api\" \"npm run dev --workspace apps/web\"",
+    "build": "npm run build --workspace apps/api && npm run build --workspace apps/web",
+    "test": "npm run test --workspace apps/api",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate dev",
+    "db:seed": "tsx prisma/seed.ts"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2",
+    "prisma": "^6.16.2",
+    "tsx": "^4.19.1",
+    "typescript": "^5.9.2"
+  }
+}

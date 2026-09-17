@@ -1,0 +1,96 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  FRONT_DESK
+  DOCTOR
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  passwordHash String
+  role         Role
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Doctor {
+  id             String        @id @default(cuid())
+  name           String
+  specialization String
+  email          String         @unique
+  phone          String
+  active         Boolean       @default(true)
+  workingHours   Json
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  appointments   Appointment[]
+}
+
+model Patient {
+  id           String        @id @default(cuid())
+  name         String
+  phone        String
+  email        String        @unique
+  dateOfBirth  DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  appointments Appointment[]
+}
+
+model Appointment {
+  id           String            @id @default(cuid())
+  doctorId     String
+  patientId    String
+  startTime    DateTime
+  endTime      DateTime
+  status       AppointmentStatus @default(SCHEDULED)
+  reason       String?
+  notes        String?
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  doctor       Doctor            @relation(fields: [doctorId], references: [id])
+  patient      Patient           @relation(fields: [patientId], references: [id])
+  cancellation Cancellation?
+
+  @@index([doctorId, startTime, endTime])
+  @@index([patientId, startTime])
+}
+
+model Cancellation {
+  id             String      @id @default(cuid())
+  appointmentId  String      @unique
+  cancelledAt    DateTime    @default(now())
+  reason         String?
+  isLate         Boolean
+  fee            Decimal     @db.Decimal(10, 2)
+  policySnapshot Json
+  appointment    Appointment @relation(fields: [appointmentId], references: [id])
+  createdAt      DateTime    @default(now())
+}
+
+model ClinicSettings {
+  id                           String   @id @default(cuid())
+  clinicName                   String   @default("MediSlot Clinic")
+  timezone                     String   @default("Asia/Kolkata")
+  freeCancellationWindowMinutes Int     @default(120)
+  lateCancellationFee          Decimal  @default(200) @db.Decimal(10, 2)
+  createdAt                    DateTime @default(now())
+  updatedAt                    DateTime @updatedAt
+}
