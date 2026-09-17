@@ -31,6 +31,8 @@ async function main() {
   }
   const passwordHash = await bcrypt.hash('medislot-demo', 10);
   await prisma.user.upsert({ where: { email: 'frontdesk@medislot.local' }, update: { passwordHash }, create: { name: 'Front Desk', email: 'frontdesk@medislot.local', passwordHash, role: Role.FRONT_DESK } });
+  await prisma.user.upsert({ where: { email: 'admin@medislot.local' }, update: { passwordHash }, create: { name: 'Clinic Admin', email: 'admin@medislot.local', passwordHash, role: Role.ADMIN } });
+  await prisma.user.upsert({ where: { email: 'doctor@medislot.local' }, update: { passwordHash }, create: { name: 'Demo Doctor', email: 'doctor@medislot.local', passwordHash, role: Role.DOCTOR } });
 }
 
 main().finally(() => prisma.$disconnect());

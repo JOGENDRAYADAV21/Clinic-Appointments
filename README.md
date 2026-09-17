@@ -35,7 +35,11 @@ npm run build
 npm run test:e2e
 ## Demo data
 
-The seed script creates `frontdesk@medislot.local` with the `FRONT_DESK` role. Demo password: `medislot-demo`.
+The seed script creates these demo users, all using password `medislot-demo`:
+
+- `frontdesk@medislot.local` (`FRONT_DESK`)
+- `admin@medislot.local` (`ADMIN`)
+- `doctor@medislot.local` (`DOCTOR`)
 
 ## Architecture
 
