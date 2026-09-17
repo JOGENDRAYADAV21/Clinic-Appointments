@@ -8,6 +8,7 @@
     "dev": "concurrently \"npm run dev --workspace apps/api\" \"npm run dev --workspace apps/web\"",
     "build": "npm run build --workspace apps/api && npm run build --workspace apps/web",
     "test": "npm run test --workspace apps/api",
+    "test:e2e": "playwright test",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:seed": "tsx prisma/seed.ts"
@@ -16,6 +17,7 @@
     "concurrently": "^9.1.2",
     "prisma": "^6.16.2",
     "tsx": "^4.19.1",
-    "typescript": "^5.9.2"
+    "typescript": "^5.9.2",
+    "@playwright/test": "^1.55.0"
   }
 }

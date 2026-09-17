@@ -8,3 +8,5 @@ coverage/
 *.log
 prisma/dev.db
 *.tsbuildinfo
+test-results/
+playwright-report/

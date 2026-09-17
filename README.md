@@ -4,15 +4,6 @@ MediSlot is a smart clinic front-desk appointment and scheduling system. It make
 
 ## Current foundation
 
-- React + TypeScript + Vite frontend dashboard
-- Fastify + TypeScript API
-- Prisma schema for PostgreSQL 16
-- Doctor, patient, appointment, cancellation, user, and clinic settings models
-- Backend overlap checks and structured `DOCTOR_DOUBLE_BOOKING` conflicts
-- Backend-owned cancellation fee calculation with policy snapshots
-- Seed data for four doctors, five patients, appointments, and a front-desk user
-- Responsive dashboard, authenticated login, schedule list, patient search, cancellations, reports, and AI assistant
-- Unit tests for back-to-back and overlapping appointment behavior
 
 ## Run locally
 
@@ -28,7 +19,9 @@ npm run db:generate
 npm run dev
 ```
 
-The web app runs at `http://localhost:5173` and the API runs at `http://localhost:4000`.
+ Optional OpenAI Responses API integration with safe local fallback when no key is configured
+ Real appointment booking form, doctor day timeline, and clinic settings view
+ Playwright browser smoke test
 
 The checked-in migration already applies the PostgreSQL exclusion constraint in `prisma/migrations/0001_init/migration.sql`. It uses `btree_gist` and a half-open `tstzrange`, so a 10:00-10:30 appointment can be followed by a 10:30-11:00 appointment but any real overlap is rejected by PostgreSQL itself. `prisma/constraints.sql` is also provided for existing databases created before this migration.
 
@@ -39,6 +32,7 @@ npm test
 npm run build
 ```
 
+npm run test:e2e
 ## Demo data
 
 The seed script creates `frontdesk@medislot.local` with the `FRONT_DESK` role. Demo password: `medislot-demo`.

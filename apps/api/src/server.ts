@@ -5,6 +5,7 @@ import { PrismaClient, AppointmentStatus } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { z } from 'zod';
 import { aiToolDefinitions, findPatient, getCancellationPolicy, getDoctorSchedule, getPatientAppointments } from './ai-tools.js';
+import { runOpenAiAssistant } from './ai-service.js';
 
 const prisma = new PrismaClient();
 const app = Fastify({ logger: true });
@@ -39,6 +40,8 @@ app.get('/api/auth/me', { preHandler: authenticate }, async (request: any) => ({
 app.get('/api/ai/tools', { preHandler: authenticate }, async () => aiToolDefinitions.map(({ name, description }) => ({ name, description })));
 app.post('/api/ai/query', { preHandler: authenticate }, async (request, reply) => {
   const { message } = z.object({ message: z.string().min(2).max(500) }).parse(request.body);
+  const openAiAnswer = await runOpenAiAssistant(message);
+  if (openAiAnswer) return { tool: 'openai-responses', answer: openAiAnswer, data: null };
   const normalized = message.toLowerCase();
   if (normalized.includes('find') || normalized.includes('appointment')) {
     const name = message.match(/(?:find|for)\s+([a-z ]+)/i)?.[1]?.trim() ?? '';
@@ -134,6 +137,12 @@ app.get('/api/reports', { preHandler: requireRole('ADMIN', 'FRONT_DESK') }, asyn
     prisma.appointment.count({ where: { status: AppointmentStatus.CANCELLED } }), prisma.cancellation.aggregate({ _sum: { fee: true } })
   ]);
   return { totalAppointments: total, completedAppointments: completed, cancelledAppointments: cancelled, cancellationRate: total ? Math.round((cancelled / total) * 100) : 0, lateCancellationRevenue: revenue._sum.fee ?? 0 };
+});
+app.get('/api/settings', { preHandler: requireRole('ADMIN', 'FRONT_DESK') }, async () => prisma.clinicSettings.findFirstOrThrow());
+app.patch('/api/settings', { preHandler: requireRole('ADMIN') }, async (request) => {
+  const input = z.object({ clinicName: z.string().min(2).max(120), timezone: z.string().min(2), freeCancellationWindowMinutes: z.number().int().min(0).max(10080), lateCancellationFee: z.number().min(0).max(100000) }).parse(request.body);
+  const existing = await prisma.clinicSettings.findFirstOrThrow();
+  return prisma.clinicSettings.update({ where: { id: existing.id }, data: input });
 });
 
 const port = Number(process.env.PORT ?? 4000);
