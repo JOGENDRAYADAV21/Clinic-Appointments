@@ -20,9 +20,10 @@ async function main() {
     ['Rahul Sharma', 'rahul@medislot.local', '9876510001'], ['Priya Verma', 'priya.v@medislot.local', '9876510002'],
     ['Amit Kumar', 'amit@medislot.local', '9876510003'], ['Neha Singh', 'neha@medislot.local', '9876510004'],
     ['Rohit Jain', 'rohit@medislot.local', '9876510005']
-  ].map(([name, email, phone]) => prisma.patient.upsert({ where: { email }, update: {}, create: { name, email, phone } })));
+  ].map(([name, email, phone]) => prisma.patient.upsert({ where: { email }, update: {}, create: { name, email, phone, dateOfBirth: new Date('1990-01-01') } })));
 
   await prisma.clinicSettings.upsert({ where: { id: 'default-settings' }, update: {}, create: { id: 'default-settings' } });
+  await prisma.appointment.deleteMany({ where: { reason: 'Routine consultation' } });
   const day = new Date(); day.setHours(9, 0, 0, 0);
   for (let index = 0; index < 5; index++) {
     const start = new Date(day.getTime() + index * 60 * 60 * 1000);
@@ -33,6 +34,7 @@ async function main() {
   await prisma.user.upsert({ where: { email: 'frontdesk@medislot.local' }, update: { passwordHash }, create: { name: 'Front Desk', email: 'frontdesk@medislot.local', passwordHash, role: Role.FRONT_DESK } });
   await prisma.user.upsert({ where: { email: 'admin@medislot.local' }, update: { passwordHash }, create: { name: 'Clinic Admin', email: 'admin@medislot.local', passwordHash, role: Role.ADMIN } });
   await prisma.user.upsert({ where: { email: 'doctor@medislot.local' }, update: { passwordHash }, create: { name: 'Demo Doctor', email: 'doctor@medislot.local', passwordHash, role: Role.DOCTOR } });
+  await prisma.user.upsert({ where: { email: 'rahul@medislot.local' }, update: { passwordHash, patientId: patients[0].id }, create: { name: patients[0].name, email: 'rahul@medislot.local', passwordHash, role: Role.PATIENT, patientId: patients[0].id } });
 }
 
 main().finally(() => prisma.$disconnect());

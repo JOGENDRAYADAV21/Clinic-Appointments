@@ -11,6 +11,7 @@ enum Role {
   ADMIN
   FRONT_DESK
   DOCTOR
+  PATIENT
 }
 
 enum AppointmentStatus {
@@ -28,6 +29,28 @@ model User {
   role         Role
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
+  passwordResets PasswordReset[]
+  patientId     String?   @unique
+  patient       Patient?  @relation(fields: [patientId], references: [id])
+}
+
+model PasswordReset {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  usedAt    DateTime?
+  createdAt DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, expiresAt])
+}
+
+model LoginAttempt {
+  email       String   @id
+  failedCount Int      @default(0)
+  lockedUntil DateTime?
+  updatedAt   DateTime @updatedAt
 }
 
 model Doctor {
@@ -52,6 +75,18 @@ model Patient {
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
   appointments Appointment[]
+  user         User?
+}
+
+model OutboxEvent {
+  id          String    @id @default(cuid())
+  dedupeKey   String    @unique
+  type        String
+  payload     Json
+  createdAt   DateTime  @default(now())
+  processedAt DateTime?
+
+  @@index([type, createdAt])
 }
 
 model Appointment {

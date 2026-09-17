@@ -1,10 +1,9 @@
 import { test, expect } from '@playwright/test';
 
 test('front desk can open the authenticated workspace', async ({ page }) => {
-  await page.addInitScript(() => {
-    localStorage.setItem('medislot-token', 'e2e-placeholder');
-    localStorage.setItem('medislot-user', JSON.stringify({ name: 'Front Desk', role: 'FRONT_DESK' }));
-  });
+  const login = await page.request.post('http://localhost:4000/api/auth/login', { data: { email: 'frontdesk@medislot.local', password: 'medislot-demo' } });
+  const session = await login.json();
+  await page.addInitScript((value) => { localStorage.setItem('medislot-token', value.token); localStorage.setItem('medislot-user', JSON.stringify(value.user)); }, session);
   await page.goto('/');
   await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
   await page.getByRole('button', { name: 'Appointments', exact: true }).click();

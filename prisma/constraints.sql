@@ -6,6 +6,6 @@ ALTER TABLE "Appointment"
   ADD CONSTRAINT appointment_doctor_no_overlap
   EXCLUDE USING gist (
     "doctorId" WITH =,
-    tstzrange("startTime", "endTime", '[)') WITH &&
+    tsrange("startTime", "endTime", '[)') WITH &&
   )
   WHERE ("status" <> 'CANCELLED');
